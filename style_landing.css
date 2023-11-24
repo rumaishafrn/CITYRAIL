@@ -187,6 +187,36 @@ body.signup-body {
     color: #D9D9D9;
 }
 
+#fullName, #email {
+    border: none;
+    border-bottom: 1px solid #D9D9D9;
+    background: transparent;
+    border-radius: 0;
+    box-shadow: none;
+    color: white;
+}
+
+#email::placeholder {
+    color: #D9D9D9;
+}
+
+#fullName::placeholder {
+    color: #D9D9D9;
+}
+
+#confirmPassword {
+    border: none;
+    border-bottom: 1px solid #D9D9D9;
+    background: transparent;
+    border-radius: 0;
+    box-shadow: none;
+    color: white;
+}
+
+#confirmPassword::placeholder {
+    color: #D9D9D9;
+}
+
 #loginbox{
     outline: 2px solid #2A474F;
     height: 400px;
