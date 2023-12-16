@@ -65,7 +65,13 @@ const postData = async (fullName, email, password) => {
         });
 
         if (!req.ok) {
-            throw new Error(`HTTP error! status: ${req.status}`);
+            if (req.status === 403) {
+                console.error('403 Forbidden: You do not have permission to perform this action.');
+                // Handle the 403 error
+                // You might want to redirect the user to a login page, or show an error message
+            } else {
+                throw new Error(`HTTP error! status: ${req.status}`);
+            }
         }
 
         const data = await req.json();
