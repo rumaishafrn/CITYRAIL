@@ -36,7 +36,6 @@ const login = async (email, password) => {
     return account ? account : null;
 };
 
-// setup dropdown selection
 const setupDropdownSelection = () => {
     // Get all dropdown items
     const dropdownItems = document.querySelectorAll('.dropdown-item');
@@ -50,8 +49,17 @@ const setupDropdownSelection = () => {
             const dropdownButton = dropdown.querySelector('.dropdown-toggle');
             // Update the text of the dropdown button
             dropdownButton.textContent = this.textContent;
-            // Save the selected value in the local storage
-            localStorage.setItem('selectedDropdownValue', this.textContent);
+
+            // Get the parent ul of the clicked item
+            const parentUl = this.closest('ul');
+            // Save the selected value in the local storage based on the ul id
+            if (parentUl.id === 'startDropdown') {
+                localStorage.setItem('startDropdown', this.textContent);
+                console.log(`Saved startDropdown: ${this.textContent}`);
+            } else if (parentUl.id === 'goalDropdown') {
+                localStorage.setItem('goalDropdown', this.textContent);
+                console.log(`Saved goalDropdown: ${this.textContent}`);
+            }
         });
     });
 };

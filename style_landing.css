@@ -74,6 +74,19 @@ body.signup-body {
     border: none !important;
 }
 
+h3 {
+    color: #ffffff;
+}
+
+#resultbox p {
+    color: #ffffff;
+}
+
+#resultbox {
+    padding-top: 50px;
+    padding-left: 50px;
+}
+
 #gridkeren {
     margin-top: 35px;
 }
