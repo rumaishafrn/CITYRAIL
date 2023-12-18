@@ -10,38 +10,36 @@ window.onload = function() {
     // Make a GET request to the /astar endpoint with the start and goal nodes as query parameters
     fetch(`http://127.0.0.1:5000/astar?start=${start}&goal=${goal}`)
         .then(response => response.json())
-        .then(data => console.log(data))
+        .then(data => {
+            const resultBox = document.getElementById('resultbox');
+
+            // Create a div to display the path
+            const pathInfo = document.createElement('div');
+            if (data !== null) {
+                pathInfo.innerHTML = `
+                    <h3>Departure: ${start}</h3>
+                    <h3>Destination: ${goal}</h3>
+                    <h3>Path:</h3>
+                    <p>${data.join(' -> ')}</p>
+                `;
+            } else {
+                pathInfo.innerHTML = `
+                    <h3>Departure: ${start}</h3>
+                    <h3>Destination: ${goal}</h3>
+                    <h3>No path found</h3>
+                `;
+            }
+
+            resultBox.appendChild(pathInfo);
+        })
         .catch(error => console.error('Error:', error));
+ 
 };
 
-// fetch('http://127.0.0.1:5000/edge')
-//     .then(response => {
-//         if (response.status !== 200) {
-//             throw new Error('Network response was not ok');
-//         }
-//         return response.json();
-//     })
-//     .then(data => {
-//         const resultBox = document.getElementById('resultbox');data.forEach(doc => {
-//             const edgeInfo = document.createElement('div');
-//             edgeInfo.innerHTML = `
-//                 <h3>Departure: ${doc.departure}</h3>
-//                 <h3>Destination: ${doc.destination}</h3>
-//                 <p>Total Weight: ${doc.nilai_edge}</p>
-//             `;
-
-//             resultBox.appendChild(edgeInfo);
-//         });
-//     })
-//     .catch(error => {
-//         console.error('There has been a problem with your fetch operation:', error);
-//     });
-
-// Get the start and goal nodes from the local storage
 const start = localStorage.getItem('startDropdown');
 const goal = localStorage.getItem('goalDropdown');
 
-fetch(`http://127.0.0.1:5000/astar?start=${start}&goal=${goal}`)
+fetch(`http://127.0.0.1:5000/astar`)
     .then(response => {
         if (response.status !== 200) {
             throw new Error('Network response was not ok');
@@ -50,6 +48,10 @@ fetch(`http://127.0.0.1:5000/astar?start=${start}&goal=${goal}`)
     })
     .then(data => {
         const resultBox = document.getElementById('resultbox');
+
+        // Get the start and goal from the input fields
+        const start = document.getElementById('startDropdown').value;
+        const goal = document.getElementById('goalDropdown').value;
 
         // Create a div to display the start, goal, and the path
         const pathInfo = document.createElement('div');
@@ -68,7 +70,34 @@ fetch(`http://127.0.0.1:5000/astar?start=${start}&goal=${goal}`)
         }
 
         resultBox.appendChild(pathInfo);
-    })
-    .catch(error => {
-        console.error('There has been a problem with your fetch operation:', error);
     });
+
+fetch(`http://127.0.0.1:5000/search`, {
+    method: 'POST',
+    headers: {
+        'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({start: start, goal: goal}),
+})
+.then(response => response.json())
+.then(data => {
+    const resultBox = document.getElementById('resultbox');
+
+    // Create a div to display the path and the weight
+    const pathInfo = document.createElement('div');
+    if (data.path !== null) {
+        pathInfo.innerHTML = `
+            <h3>Path:</h3>
+            <p>${data.path.join(' -> ')}</p>
+            <h3>Weight:</h3>
+            <p>${data.weight}</p>
+        `;
+    } else {
+        pathInfo.innerHTML = `
+            <h3>No path found</h3>
+        `;
+    }
+
+    resultBox.appendChild(pathInfo);
+})
+.catch(error => console.error('Error:', error));

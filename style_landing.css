@@ -74,12 +74,17 @@ body.signup-body {
     border: none !important;
 }
 
-h3 {
+#resultbox p {
+    margin-top: 50px;
     color: #ffffff;
+    text-align: center;
+    margin-right: 30px;
 }
 
-#resultbox p {
+#resultbox h3{
     color: #ffffff;
+    text-align: center;
+    padding-right: 30px;
 }
 
 #resultbox {
@@ -449,6 +454,7 @@ h3 {
     border-radius: 25px;
     margin-top: 80px;
 }
+
 
 
 

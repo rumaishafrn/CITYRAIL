@@ -1,6 +1,7 @@
 from flask import Flask, jsonify, send_from_directory, request
 from flask_cors import CORS
 from queue import PriorityQueue
+from flask import Flask, request, jsonify
 import requests
 import os
 import json
@@ -109,6 +110,14 @@ def get_edge():
 
     return jsonify(all_data)  # Return all data as JSON
 
+@app.route('/search', methods=['POST'])
+def search():
+    data = request.get_json()
+    start = tuple(data['start'])
+    goal = tuple(data['goal'])
+    path, weight = astar_search(start, goal)
+    return jsonify({'path': path, 'weight': weight})
+
 @app.route('/astar', methods=['GET'])
 def astar_search():
     # Get the start and goal nodes from the query parameters
@@ -121,10 +130,43 @@ def astar_search():
     heuristic_pandaluwungan = {'Lebak Bulus Grab': 221, 'Fatmawati Indomaret': 216, 'Cipete Raya': 195, 'Haji Nawi': 209, 'Blok A': 177, 'Blok M BCA': 136, 'ASEAN': 114, 'Senayan': 85, 'Istora Mandiri': 103, 'Bendungan Hilir': 64, 'Setiabudi Astra': 36, 'Dukuh Atas BNI': 67, 'Bundaran HI': 0}
     
     # Fetch the edge data from the /edge endpoint
-    edge_data = get_edge().get_json()
+    edge_data = {
+        ("Lebak Bulus Grab", "Fatmawati Indomaret"): 32,
+        ("Lebak Bulus Grab", "Cipete Raya"): 30,
+        ("Fatmawati Indomaret", "Cipete Raya"): 22,
+        ("Cipete Raya", "Blok A"): 23,
+        ("Cipete Raya", "Haji Nawi"): 29,
+        ("Haji Nawi", "Blok A"): 34,
+        ("Blok A", "Blok M BCA"): 42,
+        ("Blok M BCA", "ASEAN"): 25,
+        ("ASEAN", "Senayan"): 31,
+        ("Senayan", "Istora Mandiri"): 17,
+        ("Senayan", "Setiabudi Astra"): 50,
+        ("Istora Mandiri", "Bendungan Hilir"): 40,
+        ("Bendungan Hilir", "Setiabudi Astra"): 33,
+        ("Setiabudi Astra", "Bundaran HI"): 37,
+        ("Setiabudi Astra", "Dukuh Atas BNI"): 44,
+        ("Dukuh Atas BNI", "Bundaran HI"): 70,
+    }
 
     # Construct the graph from the edge data
-    graph = {}
+    graph = {
+        # Construct the graph from the edge data
+        'Lebak Bulus Grab': ['Fatmawati Indomaret', 'Cipete Raya'],
+        'Fatmawati Indomaret': ['Lebak Bulus Grab', 'Cipete Raya'],
+        'Cipete Raya' : ['Lebak Bulus Grab', 'Fatmawati Indomaret', 'Haji Nawi', 'Blok A'],
+        'Haji Nawi' : ['Cipete Raya', 'Blok A'],
+        'Blok A' : ['Cipete Raya', 'Haji Nawi', 'Blok M BCA'],
+        'Blok M BCA' : ['Blok A', 'ASEAN'],
+        'ASEAN' : ['Blok M BCA', 'Senayan'],
+        'Senayan' : ['ASEAN', 'Istora Mandiri', 'Setiabudi Astra'],
+        'Istora Mandiri' : ['Senayan', 'Bendungan Hilir'],
+        'Bendungan Hilir' : ['Istora Mandiri', 'Setiabudi Astra', 'Dukuh Atas BNI'],
+        'Setiabudi Astra' : ['Senayan', 'Bendungan Hilir', 'Dukuh Atas BNI', 'Bundaran HI'],
+        'Dukuh Atas BNI' : ['Bendungan Hilir', 'Setiabudi Astra', 'Bundaran HI'],
+        'Bundaran HI' : ['Setiabudi Astra', 'Dukuh Atas BNI'],
+    }
+    
     if edge_data is not None:
         for edge in edge_data:
             if isinstance(edge, dict) and 'source' in edge and 'target' in edge:
