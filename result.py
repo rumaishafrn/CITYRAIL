@@ -4,60 +4,9 @@ from queue import PriorityQueue
 from flask import Flask, request, jsonify
 import requests
 import os
-import json
-import math
 
 app = Flask(__name__)
 CORS(app)
-
-# Define the A* search algorithm
-def astar_search(start, goal):
-    # Define the heuristic function (Euclidean distance as an example)
-    def heuristic(node, goal):
-        return ((node[0] - goal[0]) ** 2 + (node[1] - goal[1]) ** 2) ** 0.5
-
-    # Initialize priority queue
-    open_set = PriorityQueue()
-    open_set.put((0, start))
-
-    # Initialize costs and parents
-    g_costs = {start: 0}
-    parents = {start: None}
-
-    while not open_set.empty():
-        _, current_node = open_set.get()
-
-        if current_node == goal:
-            # Reconstruct the path
-            path = []
-            while current_node is not None:
-                path.append(current_node)
-                current_node = parents[current_node]
-            return path[::-1]
-
-        # Explore neighbors
-        for neighbor in get_neighbors(current_node):  # Replace with your function to get neighbors
-            tentative_g_cost = g_costs[current_node] + 1  # Assuming uniform cost for simplicity
-
-            if neighbor not in g_costs or tentative_g_cost < g_costs[neighbor]:
-                g_costs[neighbor] = tentative_g_cost
-                f_cost = tentative_g_cost + heuristic(neighbor, goal)
-                open_set.put((f_cost, neighbor))
-                parents[neighbor] = current_node
-
-    # No path found
-    return None
-
-# Example function to get neighboring nodes (replace this with your actual implementation)
-def get_neighbors(node):
-    x, y = node
-    neighbors = [(x+1, y), (x-1, y), (x, y+1), (x, y-1)]
-    # Add any additional logic to filter valid neighbors based on your problem
-    return neighbors
-
-@app.route('/')
-def home():
-    return "Hello, World!"
 
 @app.route('/favicon.ico')
 def favicon():
@@ -115,8 +64,8 @@ def search():
     data = request.get_json()
     start = tuple(data['start'])
     goal = tuple(data['goal'])
-    path, weight = astar_search(start, goal)
-    return jsonify({'path': path, 'weight': weight})
+    path, weight, heuristic_name = astar_search_algorithm(start, goal)
+    return jsonify({'path': path, 'weight': weight, 'heuristic_name': heuristic_name})
 
 @app.route('/astar', methods=['GET'])
 def astar_search():
@@ -175,23 +124,24 @@ def astar_search():
                 graph[edge['source']].append(edge['target'])
 
     # Define your heuristic function
+    # Define your heuristic function
     def heuristic(node):
         min_value = min(heuristic_argowilis[node], heuristic_bromoanggrek[node], heuristic_pandaluwungan[node])
         if min_value == heuristic_argowilis[node]:
-            print(f"For node {node}, heuristic_argowilis has the minimum value: {min_value}")
+            return min_value, "Argo Wilis"
         elif min_value == heuristic_bromoanggrek[node]:
-            print(f"For node {node}, heuristic_bromoanggrek has the minimum value: {min_value}")
+            return min_value, "Bromo Anggrek"
         else:
-            print(f"For node {node}, heuristic_pandaluwungan has the minimum value: {min_value}")
-        return min_value
+            return min_value, "Pandaluwungan"
 
     # Initialize the priority queue with the start node
     frontier = PriorityQueue()
     frontier.put(start, 0)
 
-    # Initialize the cost so far and the path with the start node
+    # Initialize the cost so far, the path, and the best heuristic with the start node
     cost_so_far = {start: 0}
     came_from = {start: None}
+    best_heuristic = {start: heuristic(start)}
 
     while not frontier.empty():
         current = frontier.get()
@@ -205,22 +155,28 @@ def astar_search():
                     new_cost = cost_so_far[current] + 1
                     if next not in cost_so_far or new_cost < cost_so_far[next]:
                         cost_so_far[next] = new_cost
-                        priority = new_cost + heuristic(next)
+                        priority, heuristic_name = heuristic(next)
+                        priority += new_cost
                         frontier.put(next, priority)
                         came_from[next] = current
+                        best_heuristic[next] = heuristic_name
 
-    # Reconstruct the path
+    # Reconstruct the path and the best heuristic
     if goal in came_from:
         current = goal
         path = []
+        heuristic_path = []
         while current is not None:
             path.append(current)
+            heuristic_path.append(best_heuristic[current])
             current = came_from[current]
         path.reverse()
+        heuristic_path.reverse()
     else:
         path = None
+        heuristic_path = None
 
-    return jsonify(path)  # Return the path as JSON
+    return jsonify({"path": path, "heuristic": heuristic_path})  # Return the path and the best heuristic as JSON
 
 if __name__ == '__main__':
     app.run(debug=True)
